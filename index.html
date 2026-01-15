@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>18XX Final Scoring</title>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --panel: #101823;
+      --panel2: #0f1520;
+      --text: #e8eef7;
+      --muted: #a9b7c9;
+      --border: #213043;
+      --accent: #7cc4ff;
+      --good: #7dffa7;
+      --warn: #ffd37c;
+      --bad: #ff7c7c;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 14px;
+      --gap: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 700px at 20% 0%, #132235 0%, var(--bg) 55%);
+      color: var(--text);
+      line-height: 1.35;
+    }
+    header{
+      padding: 28px 18px 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header h1{
+      margin: 0 0 6px;
+      font-size: clamp(1.35rem, 2vw, 1.9rem);
+      letter-spacing: .2px;
+    }
+    header p{
+      margin: 0;
+      color: var(--muted);
+    }
+    main{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 18px 28px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel header{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel header h2{
+      margin: 0;
+      font-size: 1.05rem;
+    }
+    .panel header .sub{
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+    .panel .content{
+      padding: 14px;
+      display: grid;
+      gap: var(--gap);
+    }
+
+    .controls{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: var(--gap);
+      align-items: end;
+    }
+    @media (max-width: 900px){
+      .controls{ grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 520px){
+      .controls{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      display:block;
+      font-size: .9rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="number"]{
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.2);
+      color: var(--text);
+      outline: none;
+    }
+    input[type="number"]{
+      font-family: var(--mono);
+    }
+    input[type="text"]::placeholder{ color: #6f8199; }
+    input:focus{
+      border-color: rgba(124,196,255,.7);
+      box-shadow: 0 0 0 3px rgba(124,196,255,.12);
+    }
+
+    .btnrow{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button{
+      cursor:pointer;
+      border: 1px solid var(--border);
+      background: rgba(124,196,255,.13);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      transition: transform .05s ease, background .15s ease, border-color .15s ease;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+    button:hover{
+      background: rgba(124,196,255,.18);
+      border-color: rgba(124,196,255,.35);
+    }
+    button:active{ transform: translateY(1px); }
+    button.secondary{
+      background: rgba(255,255,255,.06);
+    }
+
+    .gridwrap{
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(0,0,0,.15);
+    }
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(16,24,35,.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      padding: 10px;
+      font-size: .92rem;
+      white-space: nowrap;
+    }
+    tbody td{
+      border-top: 1px solid rgba(33,48,67,.55);
+      padding: 8px 10px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(odd){
+      background: rgba(255,255,255,.02);
+    }
+    .cell-tight{ width: 120px; }
+    .cell-name{ min-width: 190px; }
+    .cell-money{ width: 300px; }
+    .money{
+      font-family: var(--mono);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(124,196,255,.25);
+      background: rgba(124,196,255,.10);
+      font-size: .9rem;
+      color: var(--text);
+    }
+    .pill strong{ font-family: var(--mono); }
+    .status{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .hint{
+      color: var(--muted);
+      font-size: .92rem;
+    }
+    .right{
+      margin-left:auto;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .notice{
+      font-size: .9rem;
+      color: var(--muted);
+    }
+    .totals{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+      justify-content: space-between;
+    }
+    .leader{
+      border-color: rgba(125,255,167,.35);
+      background: rgba(125,255,167,.10);
+    }
+    .sr-only{
+      position:absolute;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
+    }
+    footer{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 18px 28px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    code{
+      font-family: var(--mono);
+      background: rgba(255,255,255,.06);
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(33,48,67,.6);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>18XX Final Scoring</h1>
+    <p>Enter companies, final market values, and each player’s cash + share holdings. Totals calculate automatically.</p>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="setup-title">
+      <header>
+        <h2 id="setup-title">Setup</h2>
+        <div class="sub">Choose how many companies and players you want to score.</div>
+      </header>
+      <div class="content">
+        <form id="setupForm" class="controls" autocomplete="off">
+          <div>
+            <label for="companyCount">Companies (1–16)</label>
+            <input id="companyCount" type="number" min="1" max="16" step="1" value="8" inputmode="numeric" />
+          </div>
+          <div>
+            <label for="playerCount">Players (2–7)</label>
+            <input id="playerCount" type="number" min="2" max="7" step="1" value="4" inputmode="numeric" />
+          </div>
+          <div class="btnrow" style="align-self:end;">
+            <button type="button" id="applyBtn">Apply</button>
+            <button type="button" class="secondary" id="resetBtn" title="Clear everything and return to defaults">Reset</button>
+          </div>
+          <div class="notice" style="align-self:end;">
+            Tip: Use <code>Tab</code> / <code>Shift+Tab</code> to fly through the grid.
+          </div>
+        </form>
+
+        <div class="status" aria-live="polite">
+          <span class="pill"><span aria-hidden="true">🏭</span> Companies: <strong id="companyCountLabel">8</strong></span>
+          <span class="pill"><span aria-hidden="true">👤</span> Players: <strong id="playerCountLabel">4</strong></span>
+          <span class="pill"><span aria-hidden="true">🧮</span> Leader: <strong id="leaderLabel">—</strong></span>
+          <span class="right hint" id="validationHint">—</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="companies-title">
+      <header>
+        <h2 id="companies-title">Companies</h2>
+        <div class="sub">Name each company and set its final stock market value.</div>
+      </header>
+      <div class="content">
+        <div class="gridwrap" role="region" aria-label="Company configuration table">
+          <table id="companiesTable">
+            <thead>
+              <tr>
+                <th scope="col" class="cell-tight">#</th>
+                <th scope="col" class="cell-name">Company name</th>
+                <th scope="col" class="cell-money">Final value</th>
+              </tr>
+            </thead>
+            <tbody><!-- generated --></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="players-title">
+      <header>
+        <h2 id="players-title">Players</h2>
+        <div class="sub">Enter each player’s cash and how many shares they hold in each company.</div>
+      </header>
+      <div class="content">
+        <div class="gridwrap" role="region" aria-label="Player scoring table">
+          <table id="playersTable">
+            <thead><!-- generated --></thead>
+            <tbody><!-- generated --></tbody>
+          </table>
+        </div>
+
+        <div class="totals">
+          <div class="hint">
+            Formula: <code>Total = Cash + Σ(shares × company value)</code>
+          </div>
+          <div class="btnrow">
+            <button style="display: none;" type="button" class="secondary" id="exportBtn" title="Copy JSON to clipboard">Copy JSON</button>
+            <button style="display: none;" type="button" class="secondary" id="importBtn" title="Paste JSON to restore a saved score sheet">Paste JSON</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Values are treated as integers; blanks count as 0. Share counts are whole numbers.
+  </footer>
+
+  <dialog id="jsonDialog">
+    <form method="dialog" style="max-width:900px;">
+      <h3 style="margin:0 0 10px;">Score Sheet JSON</h3>
+      <p style="margin:0 0 10px;color:var(--muted);">You can copy this and paste it later to restore the sheet.</p>
+      <textarea id="jsonArea" style="width:100%;min-height:260px;padding:10px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.25);color:var(--text);font-family:var(--mono);"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap;">
+        <button value="cancel" class="secondary">Close</button>
+        <button id="jsonConfirmBtn" value="ok">Apply</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // Limits
+      const LIMITS = {
+        companies: { min: 1, max: 16 },
+        players: { min: 2, max: 7 }
+      };
+
+      // State (single source of truth)
+      let state = {
+        companyCount: 8,
+        playerCount: 4,
+        companies: [],
+        players: []
+      };
+
+      // DOM
+      const companyCountInput = document.getElementById("companyCount");
+      const playerCountInput = document.getElementById("playerCount");
+      const applyBtn = document.getElementById("applyBtn");
+      const resetBtn = document.getElementById("resetBtn");
+
+      const companyCountLabel = document.getElementById("companyCountLabel");
+      const playerCountLabel = document.getElementById("playerCountLabel");
+      const leaderLabel = document.getElementById("leaderLabel");
+      const validationHint = document.getElementById("validationHint");
+
+      const companiesTableBody = document.querySelector("#companiesTable tbody");
+      const playersTable = document.getElementById("playersTable");
+      const playersThead = playersTable.querySelector("thead");
+      const playersTbody = playersTable.querySelector("tbody");
+
+      const exportBtn = document.getElementById("exportBtn");
+      const importBtn = document.getElementById("importBtn");
+      const jsonDialog = document.getElementById("jsonDialog");
+      const jsonArea = document.getElementById("jsonArea");
+      const jsonConfirmBtn = document.getElementById("jsonConfirmBtn");
+
+      // Utilities
+      function clampInt(value, min, max, fallback) {
+        const n = Number.parseInt(value, 10);
+        if (Number.isNaN(n)) return fallback;
+        return Math.max(min, Math.min(max, n));
+      }
+
+      function toInt(value) {
+        const n = Number.parseInt(String(value ?? "").trim(), 10);
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function safeText(value, fallback = "") {
+        const s = String(value ?? "").trim();
+        return s.length ? s : fallback;
+      }
+
+      function defaultCompany(i) {
+        return { name: `Company ${i + 1}`, value: 0 };
+      }
+
+      function defaultPlayer(i, companyCount) {
+        return {
+          name: `Player ${i + 1}`,
+          cash: 0,
+          shares: Array.from({ length: companyCount }, () => 0)
+        };
+      }
+
+      function ensureStateShape() {
+        // Ensure companies array matches companyCount
+        while (state.companies.length < state.companyCount) {
+          state.companies.push(defaultCompany(state.companies.length));
+        }
+        state.companies = state.companies.slice(0, state.companyCount);
+
+        // Ensure players array matches playerCount
+        while (state.players.length < state.playerCount) {
+          state.players.push(defaultPlayer(state.players.length, state.companyCount));
+        }
+        state.players = state.players.slice(0, state.playerCount);
+
+        // Ensure each player shares array matches companyCount
+        state.players.forEach(p => {
+          if (!Array.isArray(p.shares)) p.shares = [];
+          while (p.shares.length < state.companyCount) p.shares.push(0);
+          p.shares = p.shares.slice(0, state.companyCount);
+        });
+      }
+
+      function computeTotals() {
+        const companyValues = state.companies.map(c => toInt(c.value));
+        const totals = state.players.map(p => {
+          const cash = toInt(p.cash);
+          let stock = 0;
+          for (let i = 0; i < state.companyCount; i++) {
+            const shares = toInt(p.shares[i]);
+            stock += shares * companyValues[i];
+          }
+          return { cash, stock, total: cash + stock };
+        });
+        return totals;
+      }
+
+      function formatMoney(n) {
+        const v = toInt(n);
+        // basic formatting with commas
+        return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      // Rendering
+      function renderCompanies() {
+        companiesTableBody.innerHTML = "";
+        for (let i = 0; i < state.companyCount; i++) {
+          const c = state.companies[i];
+
+          const tr = document.createElement("tr");
+
+          const tdIdx = document.createElement("td");
+          tdIdx.textContent = String(i + 1);
+          tdIdx.className = "cell-tight";
+          tr.appendChild(tdIdx);
+
+          const tdName = document.createElement("td");
+          tdName.className = "cell-name";
+          const nameInput = document.createElement("input");
+          nameInput.type = "text";
+          nameInput.value = safeText(c.name, `Company ${i + 1}`);
+          nameInput.placeholder = `Company ${i + 1}`;
+          nameInput.setAttribute("aria-label", `Company ${i + 1} name`);
+          nameInput.addEventListener("input", () => {
+            state.companies[i].name = nameInput.value;
+            renderPlayersHeader(); // reflect header labels
+            updateAllTotals();
+          });
+          tdName.appendChild(nameInput);
+          tr.appendChild(tdName);
+
+          const tdValue = document.createElement("td");
+          tdValue.className = "cell-money";
+          const valueInput = document.createElement("input");
+          valueInput.type = "number";
+          valueInput.min = "0";
+          valueInput.step = "1";
+          valueInput.inputMode = "numeric";
+          valueInput.value = toInt(c.value);
+          valueInput.setAttribute("aria-label", `Company ${i + 1} final value`);
+          valueInput.addEventListener("input", () => {
+            state.companies[i].value = toInt(valueInput.value);
+            updateAllTotals();
+          });
+          tdValue.appendChild(valueInput);
+          tr.appendChild(tdValue);
+
+          companiesTableBody.appendChild(tr);
+        }
+      }
+
+      function renderPlayersHeader() {
+        // Build header: Player, Cash, then each company, then Stock Value, Total
+        const tr = document.createElement("tr");
+
+        const thPlayer = document.createElement("th");
+        thPlayer.scope = "col";
+        thPlayer.className = "cell-name";
+        thPlayer.textContent = "Player";
+        tr.appendChild(thPlayer);
+
+        const thCash = document.createElement("th");
+        thCash.scope = "col";
+        thCash.className = "cell-money";
+        thCash.textContent = "Cash";
+        tr.appendChild(thCash);
+
+        for (let i = 0; i < state.companyCount; i++) {
+          const th = document.createElement("th");
+          th.scope = "col";
+          th.className = "cell-tight";
+          const companyName = safeText(state.companies[i].name, `Company ${i + 1}`);
+          th.textContent = `${companyName} (shares)`;
+          tr.appendChild(th);
+        }
+
+        const thStock = document.createElement("th");
+        thStock.scope = "col";
+        thStock.className = "cell-money";
+        thStock.textContent = "Stock Value";
+        tr.appendChild(thStock);
+
+        const thTotal = document.createElement("th");
+        thTotal.scope = "col";
+        thTotal.className = "cell-money";
+        thTotal.textContent = "Total";
+        tr.appendChild(thTotal);
+
+        playersThead.innerHTML = "";
+        playersThead.appendChild(tr);
+      }
+
+      function renderPlayersBody() {
+        playersTbody.innerHTML = "";
+
+        for (let pIdx = 0; pIdx < state.playerCount; pIdx++) {
+          const p = state.players[pIdx];
+          const tr = document.createElement("tr");
+          tr.dataset.playerIndex = String(pIdx);
+
+          // Player name
+          const tdName = document.createElement("td");
+          tdName.className = "cell-name";
+          const nameInput = document.createElement("input");
+          nameInput.type = "text";
+          nameInput.value = safeText(p.name, `Player ${pIdx + 1}`);
+          nameInput.placeholder = `Player ${pIdx + 1}`;
+          nameInput.setAttribute("aria-label", `Player ${pIdx + 1} name`);
+          nameInput.addEventListener("input", () => {
+            state.players[pIdx].name = nameInput.value;
+            updateAllTotals();
+          });
+          tdName.appendChild(nameInput);
+          tr.appendChild(tdName);
+
+          // Cash
+          const tdCash = document.createElement("td");
+          tdCash.className = "cell-money";
+          const cashInput = document.createElement("input");
+		  cashInput.style.width = "140px";
+          cashInput.type = "number";
+          cashInput.step = "1";
+          cashInput.inputMode = "numeric";
+          cashInput.value = toInt(p.cash);
+		  
+          cashInput.setAttribute("aria-label", `Player ${pIdx + 1} cash`);
+          cashInput.addEventListener("input", () => {
+            state.players[pIdx].cash = toInt(cashInput.value);
+            updateAllTotals();
+          });
+          tdCash.appendChild(cashInput);
+          tr.appendChild(tdCash);
+
+          // Shares per company
+          for (let cIdx = 0; cIdx < state.companyCount; cIdx++) {
+            const td = document.createElement("td");
+            td.className = "cell-tight";
+            const sharesInput = document.createElement("input");
+            sharesInput.type = "number";
+            sharesInput.min = "0";
+            sharesInput.step = "1";
+            sharesInput.inputMode = "numeric";
+            sharesInput.value = toInt(p.shares[cIdx]);
+            const companyName = safeText(state.companies[cIdx].name, `Company ${cIdx + 1}`);
+            sharesInput.setAttribute("aria-label", `Player ${pIdx + 1} shares of ${companyName}`);
+            sharesInput.addEventListener("input", () => {
+              state.players[pIdx].shares[cIdx] = toInt(sharesInput.value);
+              updateAllTotals();
+            });
+            td.appendChild(sharesInput);
+            tr.appendChild(td);
+          }
+
+          // Stock Value (computed)
+          const tdStock = document.createElement("td");
+          tdStock.className = "cell-money money";
+          tdStock.dataset.role = "stock";
+          tdStock.textContent = "0";
+          tr.appendChild(tdStock);
+
+          // Total (computed)
+          const tdTotal = document.createElement("td");
+          tdTotal.className = "cell-money money";
+          tdTotal.dataset.role = "total";
+          tdTotal.textContent = "0";
+          tr.appendChild(tdTotal);
+
+          playersTbody.appendChild(tr);
+        }
+      }
+
+      function updateAllTotals() {
+        ensureStateShape();
+
+        const totals = computeTotals();
+
+        // Update row computed cells
+        const rows = playersTbody.querySelectorAll("tr");
+        rows.forEach((row, idx) => {
+          const stockCell = row.querySelector('[data-role="stock"]');
+          const totalCell = row.querySelector('[data-role="total"]');
+          stockCell.textContent = formatMoney(totals[idx].stock);
+          totalCell.textContent = formatMoney(totals[idx].total);
+          row.classList.remove("leader");
+        });
+
+        // Determine leader(s)
+        let best = null;
+        totals.forEach(t => {
+          if (best === null || t.total > best) best = t.total;
+        });
+
+        const leaders = [];
+        totals.forEach((t, idx) => {
+          if (t.total === best && best !== null) {
+            leaders.push(safeText(state.players[idx].name, `Player ${idx + 1}`));
+            // highlight row
+            const row = playersTbody.querySelector(`tr[data-player-index="${idx}"]`);
+            if (row) row.classList.add("leader");
+          }
+        });
+
+        leaderLabel.textContent = leaders.length ? `${leaders.join(", ")} (${formatMoney(best)})` : "—";
+
+        // Basic validation hint
+        const unnamedCompanies = state.companies.filter((c, i) => !safeText(c.name).length || safeText(c.name) === `Company ${i + 1}`);
+        validationHint.textContent =
+          unnamedCompanies.length
+            ? "Tip: rename companies for clearer scoring."
+            : "Ready.";
+      }
+
+      function renderAll() {
+        ensureStateShape();
+        companyCountLabel.textContent = String(state.companyCount);
+        playerCountLabel.textContent = String(state.playerCount);
+        renderCompanies();
+        renderPlayersHeader();
+        renderPlayersBody();
+        updateAllTotals();
+      }
+
+      // Actions
+      function applyCounts() {
+        const newCompanyCount = clampInt(companyCountInput.value, LIMITS.companies.min, LIMITS.companies.max, state.companyCount);
+        const newPlayerCount = clampInt(playerCountInput.value, LIMITS.players.min, LIMITS.players.max, state.playerCount);
+
+        state.companyCount = newCompanyCount;
+        state.playerCount = newPlayerCount;
+
+        ensureStateShape();
+        renderAll();
+      }
+
+      function hardReset() {
+        state = {
+          companyCount: 8,
+          playerCount: 4,
+          companies: [],
+          players: []
+        };
+        companyCountInput.value = state.companyCount;
+        playerCountInput.value = state.playerCount;
+        renderAll();
+      }
+
+      function openJsonDialog(mode) {
+        // mode: "export" or "import"
+        if (mode === "export") {
+          const payload = JSON.stringify(state, null, 2);
+          jsonArea.value = payload;
+          jsonConfirmBtn.style.display = "none";
+        } else {
+          jsonArea.value = "";
+          jsonConfirmBtn.style.display = "";
+        }
+        if (typeof jsonDialog.showModal === "function") {
+          jsonDialog.showModal();
+        } else {
+          // Fallback if <dialog> isn't supported
+          alert("Your browser doesn't support <dialog>. Use the console to copy/paste state.");
+        }
+      }
+
+      async function copyJsonToClipboard() {
+        const payload = JSON.stringify(state, null, 2);
+        try {
+          await navigator.clipboard.writeText(payload);
+          validationHint.textContent = "Copied JSON to clipboard.";
+        } catch {
+          // fallback: show dialog with JSON to manually copy
+          openJsonDialog("export");
+        }
+      }
+
+      function pasteJsonFromUser() {
+        openJsonDialog("import");
+      }
+
+      function applyPastedJson() {
+        try {
+          const raw = jsonArea.value.trim();
+          if (!raw) throw new Error("Empty JSON");
+          const obj = JSON.parse(raw);
+
+          // Sanitize & clamp
+          const companyCount = clampInt(obj.companyCount, LIMITS.companies.min, LIMITS.companies.max, 8);
+          const playerCount = clampInt(obj.playerCount, LIMITS.players.min, LIMITS.players.max, 4);
+
+          const companies = Array.isArray(obj.companies) ? obj.companies : [];
+          const players = Array.isArray(obj.players) ? obj.players : [];
+
+          state.companyCount = companyCount;
+          state.playerCount = playerCount;
+
+          state.companies = companies.slice(0, companyCount).map((c, i) => ({
+            name: safeText(c?.name, `Company ${i + 1}`),
+            value: toInt(c?.value)
+          }));
+          while (state.companies.length < companyCount) state.companies.push(defaultCompany(state.companies.length));
+
+          state.players = players.slice(0, playerCount).map((p, i) => ({
+            name: safeText(p?.name, `Player ${i + 1}`),
+            cash: toInt(p?.cash),
+            shares: Array.isArray(p?.shares)
+              ? p.shares.slice(0, companyCount).map(toInt)
+              : Array.from({ length: companyCount }, () => 0)
+          }));
+          while (state.players.length < playerCount) state.players.push(defaultPlayer(state.players.length, companyCount));
+          state.players.forEach(p => {
+            while (p.shares.length < companyCount) p.shares.push(0);
+            p.shares = p.shares.slice(0, companyCount);
+          });
+
+          companyCountInput.value = state.companyCount;
+          playerCountInput.value = state.playerCount;
+
+          renderAll();
+          validationHint.textContent = "Loaded JSON.";
+        } catch (err) {
+          validationHint.textContent = "Could not parse JSON. (Make sure it’s valid.)";
+        }
+      }
+
+      // Events
+      applyBtn.addEventListener("click", applyCounts);
+      resetBtn.addEventListener("click", hardReset);
+
+      exportBtn.addEventListener("click", copyJsonToClipboard);
+      importBtn.addEventListener("click", pasteJsonFromUser);
+
+      jsonDialog.addEventListener("close", () => {
+        // no-op; handled by button
+      });
+
+      jsonConfirmBtn.addEventListener("click", (e) => {
+        // Prevent dialog from closing if we fail
+        e.preventDefault();
+        applyPastedJson();
+        jsonDialog.close();
+      });
+
+      // Initialize with defaults
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
